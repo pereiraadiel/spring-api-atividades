@@ -48,7 +48,7 @@ public class AtividadesService {
         return entity;
     } 
 
-    public AtividadeEntity updateAtividade(AtividadeEntity entity) throws Exception 
+    public AtividadeEntity updateAtividade(AtividadeEntity entity, Long id) throws Exception 
     {
         Optional<AtividadeEntity> atividade = repository.findById(entity.getId());
          

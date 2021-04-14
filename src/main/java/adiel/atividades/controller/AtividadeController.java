@@ -50,6 +50,15 @@ public class AtividadeController {
     return new ResponseEntity<AtividadeEntity> (updatedAtividade, HttpStatus.CREATED);
   }
 
+  @PostMapping("/{id}")
+  public ResponseEntity<AtividadeEntity> updateAtividade(AtividadeEntity atividade, @PathVariable("id") Long id) throws Exception{
+   System.out.println("\n\nAtividadeE: "+ atividade.toString() + "\n\n" ) ;
+
+    AtividadeEntity updatedAtividade = service.updateAtividade(atividade, id);
+
+    return new ResponseEntity<AtividadeEntity> (updatedAtividade, HttpStatus.CREATED);
+  }
+
   @DeleteMapping("/{id}")
     public HttpStatus deleteEmployeeById(@PathVariable("id") Long id) throws Exception {
         service.deleteAtividadeById(id);

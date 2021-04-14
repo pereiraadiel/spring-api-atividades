@@ -58,10 +58,9 @@ public class AtividadeEntity {
     return "AtividadeEntity [id=" + id + ", titulo=" + titulo + ", descricao=" + descricao + "]";
   }
 
-  // public AtividadeEntity() {
-  //   this.id = (long) Math.random();
-  //   this.createdAt = new Date(System.currentTimeMillis());
-  //   this.updatedAt = new Date(System.currentTimeMillis());
-  // }
+  public AtividadeEntity() {
+    this.createdAt = new Date(System.currentTimeMillis());
+    this.updatedAt = new Date(System.currentTimeMillis());
+  }
   
 }
