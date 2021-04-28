@@ -34,8 +34,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 // .and()
-                .authorizeRequests().antMatchers("/", "/login", "/users").permitAll().anyRequest().authenticated().and()
-                .formLogin().disable().httpBasic().disable().logout().disable().csrf().disable();
+                .authorizeRequests()
+                .antMatchers("/", "/login", "/users").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .formLogin().disable()
+                .httpBasic().disable()
+                .logout().disable()
+                .csrf().disable();
     }
 
     @Override

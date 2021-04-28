@@ -36,8 +36,8 @@ public class JWTAuthFilter extends OncePerRequestFilter {
           if(isValid){
               String loginUsuario =jwtService.obterLoginUsuario(token);
               UserDetails usuario = userService.loadUserByUsername(loginUsuario);
-              TokenProvider tProvider = new TokenProvider();
-              Claims claims = tProvider.getAllClaims(token);
+            //   TokenProvider tProvider = new TokenProvider();
+              Claims claims = this.jwtService.obterClaims(token);
               UsernamePasswordAuthenticationToken user =
                       new UsernamePasswordAuthenticationToken(usuario, claims, usuario.getAuthorities());
               user.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));

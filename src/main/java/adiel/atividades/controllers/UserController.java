@@ -5,6 +5,7 @@ import adiel.atividades.entities.LoginResponse;
 import adiel.atividades.entities.User;
 import adiel.atividades.exceptions.UserAlreadyExistsException;
 import adiel.atividades.providers.TokenProvider;
+import adiel.atividades.services.JWTService;
 import adiel.atividades.services.MyUserDetailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class UserController {
     @Autowired
     MyUserDetailService usuarioService;
 
+    @Autowired
+    JWTService jwtService;
+
     @PostMapping("/users")
     public ResponseEntity<Object> createUser(@RequestBody UserDTO user) {
         User usuario = new User();
@@ -42,6 +46,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody UserDTO user) {
         UserDetails usuario = usuarioService.loadUserByUsername(user.username);
+        User myUser = usuarioService.findByLogin(user.username);
         LoginResponse lResponse= new LoginResponse();
 
         if(usuario.getUsername().equals("")) {
@@ -54,9 +59,9 @@ public class UserController {
             lResponse.message="Combinação usuário/senha incorreta!";
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(lResponse);
         }
-        
-        TokenProvider tokenProvider = new TokenProvider();
-        String token = tokenProvider.generateToken(usuario);
+        // TokenProvider tokenProvider = new TokenProvider();
+        String token = //tokenProvider.generateToken(usuario);
+            jwtService.geraToken(myUser);
         // String token = "TOken.a10je899q30r.1294u91r01w89.180414u801r4u1.12890170u12";
 
         lResponse.message="Sucesso! você está autenticado!";

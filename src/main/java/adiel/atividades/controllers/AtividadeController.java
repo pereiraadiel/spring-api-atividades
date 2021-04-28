@@ -30,64 +30,97 @@ public class AtividadeController {
 
   @Autowired
   AtividadesService service;
-  
+
   @Autowired
   JWTService jwtService;
-  
+
   @GetMapping
   public ResponseEntity<List<AtividadeEntity>> getAllAtividades() {
     System.out.println("Getting all atividades");
-    UsernamePasswordAuthenticationToken auth = 
-      (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-    MyUserPrincipal userPrincipal = (MyUserPrincipal)  auth.getPrincipal();
+    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
 
-    System.out.println("\t\t -> auth: "+ auth.toString());
-    
+    System.out.println("\t\t -> auth: " + auth.toString());
+
     List<AtividadeEntity> atividades = service.getAllAtividades(userPrincipal.getId());
-    
-    return new ResponseEntity<List<AtividadeEntity>> (atividades, HttpStatus.OK);
+
+    return new ResponseEntity<List<AtividadeEntity>>(atividades, HttpStatus.OK);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<AtividadeEntity> getAtividade(@PathVariable("id") Long id) {
     AtividadeEntity atividade = null;
+
     try {
-      atividade = service.getAtividadeById(id);
-  
-      return new ResponseEntity<AtividadeEntity> (atividade, HttpStatus.OK);
-    }catch(Exception error){
-      return new ResponseEntity<AtividadeEntity> (atividade, HttpStatus.NOT_FOUND);
+      UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
+          .getContext().getAuthentication();
+      MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+
+      System.out.println(userPrincipal.toString());
+
+      atividade = service.getAtividadeById(id, userPrincipal.getId());
+      System.out.print(atividade.toString());
+
+      return new ResponseEntity<AtividadeEntity>(atividade, HttpStatus.OK);
+    } catch (Exception error) {
+      return new ResponseEntity<AtividadeEntity>(atividade, HttpStatus.NOT_FOUND);
     }
   }
 
   @PostMapping
-  public ResponseEntity<AtividadeEntity> createAtividade(@RequestBody() AtividadeEntity atividade) throws Exception{
-    System.out.println("\n\nAtividadeE: "+ atividade.toString() + "\n\n" ) ;
+  public ResponseEntity<Object> createAtividade(@RequestBody() AtividadeEntity atividade) throws Exception {
+    System.out.println("\n\nAtividadeE: " + atividade.toString() + "\n\n");
 
-    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-    MyUserPrincipal userPrincipal = (MyUserPrincipal)  auth.getPrincipal();
+    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
 
-    System.out.println("\t\t -> auth: "+ auth.toString());
+    System.out.println("\t\t -> auth: " + auth.toString());
     atividade.setUserId(userPrincipal.getId());
-    AtividadeEntity updatedAtividade = service.createAtividade(atividade);
+    try {
+      AtividadeEntity updatedAtividade = service.createAtividade(atividade);
+      return new ResponseEntity<Object>(updatedAtividade, HttpStatus.CREATED);
 
-
-    return new ResponseEntity<AtividadeEntity> (updatedAtividade, HttpStatus.CREATED);
+    }catch(Exception error){
+      
+      return new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST);
+    }
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<AtividadeEntity> updateAtividade(@RequestBody() AtividadeEntity atividade, @PathVariable("id") Long id) throws Exception{
-   System.out.println("\n\nAtividadeE: "+ atividade.toString() + "\n\n" ) ;
+  public ResponseEntity<Object> updateAtividade(@RequestBody() AtividadeEntity atividade,
+      @PathVariable("id") Long id) throws Exception {
+    
+    System.out.println("\n\nAtividadeE: " + atividade.toString() + "\n\n");
 
-    AtividadeEntity updatedAtividade = service.updateAtividade(atividade, id);
+    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
 
-    return new ResponseEntity<AtividadeEntity> (updatedAtividade, HttpStatus.CREATED);
+    try {
+      
+      AtividadeEntity updatedAtividade = service.updateAtividade(atividade, id, userPrincipal.getId());
+      return new ResponseEntity<Object>(updatedAtividade, HttpStatus.CREATED);
+      
+    }catch(Exception error){
+      
+      return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+    }
   }
 
   @DeleteMapping("/{id}")
-    public HttpStatus deleteEmployeeById(@PathVariable("id") Long id) throws Exception {
-        service.deleteAtividadeById(id);
-        return HttpStatus.OK;
+  public ResponseEntity<Object> deleteEmployeeById(@PathVariable("id") Long id) throws Exception {
+
+    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+        .getAuthentication();
+    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+    try {
+      service.deleteAtividadeById(id, userPrincipal.getId());
+      return new ResponseEntity<Object>(null, HttpStatus.OK);
+    } catch (Exception error) {
+      return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
     }
+  }
 
 }

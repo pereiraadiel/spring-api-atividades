@@ -17,6 +17,8 @@ public class AtividadesService {
      
     @Autowired
     AtividadeRepository repository;
+
+    private String NOT_FOUND_EXCEPTION_STRING = "Atividade não encontrada";
      
     public List<AtividadeEntity> getAllAtividades(Long userId)
     {
@@ -29,15 +31,16 @@ public class AtividadesService {
         }
     }
      
-    public AtividadeEntity getAtividadeById(Long id) throws Exception 
-    {
-        Optional<AtividadeEntity> atividade = repository.findById(id);
-         
-        if(atividade.isPresent()) {
-            return atividade.get();
-        } else {
-            throw new Exception("Atividade nao encontrada");
+    public AtividadeEntity getAtividadeById(Long id, Long userId) throws Exception {
+        List<AtividadeEntity> atividades = repository.findAllByUserId(userId);
+        for (int i=0; i<atividades.size(); i++){
+            System.out.println(atividades.get(i).toString());
+            if(atividades.get(i).getId().equals(id)){
+                return atividades.get(i);
+            }
         }
+        
+        throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
     }
      
     public AtividadeEntity createAtividade(AtividadeEntity entity) throws Exception 
@@ -49,31 +52,39 @@ public class AtividadesService {
         return entity;
     } 
 
-    public AtividadeEntity updateAtividade(AtividadeEntity entity, Long id) throws Exception 
-    {
-        Optional<AtividadeEntity> atividade = repository.findById(entity.getId());
-         
-        AtividadeEntity newEntity = atividade.get();
-        newEntity.setId(entity.getId());
-        newEntity.setDescricao(entity.getDescricao());
-        newEntity.setTitulo(entity.getTitulo());
-        newEntity.setCreatedAt(entity.getCreatedAt());
-        newEntity.setUpdatedAt(new Date(System.currentTimeMillis()));
+    public AtividadeEntity updateAtividade(AtividadeEntity entity, Long id, Long userId) throws Exception {
 
-        newEntity = repository.save(newEntity);
-            
-        return newEntity;
+        List<AtividadeEntity> atividades = repository.findAllByUserId(userId);
+        for (int i=0; i<atividades.size(); i++){
+            System.out.println(atividades.get(i).toString());
+            if(atividades.get(i).getId().equals(id)){
+                AtividadeEntity atividade = atividades.get(i);
+                atividade.setDescricao(entity.getDescricao());
+                atividade.setTitulo(entity.getTitulo());
+                atividade.setCreatedAt(entity.getCreatedAt());
+                atividade.setUpdatedAt(new Date(System.currentTimeMillis()));
+        
+                atividade = repository.save(atividade);
+                    
+                return atividade;
+            }
+        }
+        
+        throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
+
     } 
      
-    public void deleteAtividadeById(Long id) throws Exception 
-    {
-        Optional<AtividadeEntity> atividade = repository.findById(id);
-         
-        if(atividade.isPresent()) 
-        {
-            repository.deleteById(id);
-        } else {
-            throw new Exception("Atividade nao encontrada");
+    public void deleteAtividadeById(Long id, Long userId) throws Exception {
+        List<AtividadeEntity> atividades = repository.findAllByUserId(userId);
+
+        for (int i=0; i<atividades.size(); i++){
+            if(atividades.get(i).getId().equals(id)){
+                repository.deleteById(id);
+                return;
+            }
         }
+         
+        throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
+        
     } 
 }

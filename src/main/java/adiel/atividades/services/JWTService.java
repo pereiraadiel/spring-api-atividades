@@ -23,6 +23,8 @@ public class JWTService {
     private String chaveAssinatura;
     
     public String geraToken(User user)  {
+        // System.out.println("expiração: "+expiração);
+        // if (expiração == null) expiração = "3600";
         long expString = Long.valueOf(expiração);
         LocalDateTime horaExpiracao = LocalDateTime.now().plusMinutes(expString);
         Date date = Date.from(horaExpiracao.atZone(ZoneId.systemDefault()).toInstant());

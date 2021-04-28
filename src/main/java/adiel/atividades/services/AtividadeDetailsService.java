@@ -12,20 +12,20 @@ import adiel.atividades.repositories.AtividadeRepository;
 
 public class AtividadeDetailsService {
   
-  // @Autowired
-  // private AtividadeRepository atividadeRepo;  
+  @Autowired
+  private AtividadeRepository atividadeRepo;  
 
-  // public List<AtividadeEntity> findAllByUser(Long userId){
-  //     List<AtividadeEntity> atividades = atividadeRepo.findAll();
-  //     List<AtividadeEntity> userAtividades = new ArrayList();
+  public List<AtividadeEntity> findAllByUser(Long userId){
+      List<AtividadeEntity> atividades = atividadeRepo.findAll();
+      List<AtividadeEntity> userAtividades = new ArrayList();
       
-  //     for ( int i=0; i< atividades.size(); i++) {
-  //       AtividadeEntity atividade = atividades.get(i);
-  //       if ( atividade.getUserId() == userId ){
-  //         userAtividades.add(atividade);
-  //       }
-  //     }
+      for ( int i=0; i< atividades.size(); i++) {
+        AtividadeEntity atividade = atividades.get(i);
+        if ( atividade.getUserId() == userId ){
+          userAtividades.add(atividade);
+        }
+      }
 
-  //     return userAtividades;
-  // }
+      return userAtividades;
+  }
 }
