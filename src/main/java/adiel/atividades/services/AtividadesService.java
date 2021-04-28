@@ -1,5 +1,6 @@
 package adiel.atividades.services;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,9 +18,9 @@ public class AtividadesService {
     @Autowired
     AtividadeRepository repository;
      
-    public List<AtividadeEntity> getAllAtividades()
+    public List<AtividadeEntity> getAllAtividades(Long userId)
     {
-        List<AtividadeEntity> atividades = repository.findAll();
+        List<AtividadeEntity> atividades = repository.findAllByUserId(userId);
          
         if(atividades.size() > 0) {
             return atividades;
@@ -56,6 +57,8 @@ public class AtividadesService {
         newEntity.setId(entity.getId());
         newEntity.setDescricao(entity.getDescricao());
         newEntity.setTitulo(entity.getTitulo());
+        newEntity.setCreatedAt(entity.getCreatedAt());
+        newEntity.setUpdatedAt(new Date(System.currentTimeMillis()));
 
         newEntity = repository.save(newEntity);
             

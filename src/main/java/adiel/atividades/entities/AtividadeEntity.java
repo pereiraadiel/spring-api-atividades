@@ -29,6 +29,9 @@ public class AtividadeEntity {
   @Column(name = "updated_at")
   private Date updatedAt;
 
+  @Column(name = "user_id")
+  private Long userId;
+
   public Long getId() {
     return this.id;
   }
@@ -37,8 +40,20 @@ public class AtividadeEntity {
     return this.titulo;
   }
 
+  public Long getUserId(){
+    return this.userId;
+  }
+
   public String getDescricao() {
     return this.descricao;
+  }
+
+  public Date getCreatedAt() {
+    return this.createdAt;
+  }
+
+  public Date getUpdatedAt() {
+    return this.updatedAt;
   }
 
   public void setId(Long id) {
@@ -51,6 +66,18 @@ public class AtividadeEntity {
 
   public void setDescricao(String descricao) {
     this.descricao = descricao;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
+
+  public void setCreatedAt(Date createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public void setUpdatedAt(Date updatedAt) {
+    this.updatedAt = updatedAt;
   }
 
   @Override
