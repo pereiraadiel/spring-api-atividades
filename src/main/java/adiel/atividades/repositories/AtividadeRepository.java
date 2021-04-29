@@ -11,4 +11,5 @@ import adiel.atividades.entities.AtividadeEntity;
 @Repository
 public interface AtividadeRepository extends JpaRepository<AtividadeEntity, Long> {
   List<AtividadeEntity> findAllByUserId(Long userId);
+  AtividadeEntity findByIdAndUserId(Long id, Long userId);
 }
