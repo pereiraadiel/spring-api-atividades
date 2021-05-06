@@ -31,7 +31,7 @@ public class AtividadesService {
 
     private final String NOT_FOUND_EXCEPTION_STRING = "Atividade não encontrada";
      
-    public List<AtividadeEntity> getAllAtividades(){
+    public List<AtividadeEntity> getAllAtividades() throws Exception{
         UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
             .getAuthentication();
         MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
@@ -41,7 +41,7 @@ public class AtividadesService {
         if(user.getTipo().equals("interno")){
             atividades = repository.findAllByUserId(user.getId());
         }else {
-            // atividades = externalApi.getAllAtividades();
+            atividades = externalApi.getAllAtividades();
         }
         return atividades;
     }

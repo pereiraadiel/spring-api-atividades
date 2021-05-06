@@ -1,5 +1,6 @@
 package adiel.atividades.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,22 +35,29 @@ public class AtividadeController {
 
   @GetMapping
   public ResponseEntity<List<AtividadeEntity>> getAllAtividades() {
-    List<AtividadeEntity> atividades = service.getAllAtividades();
+    List<AtividadeEntity> atividades = new ArrayList<AtividadeEntity>();
+    try {
+      atividades = service.getAllAtividades();
+      return new ResponseEntity<List<AtividadeEntity>>(atividades, HttpStatus.OK);
 
-    return new ResponseEntity<List<AtividadeEntity>>(atividades, HttpStatus.OK);
+    } catch (Exception error) {
+      System.out.println(error.getMessage());
+      return new ResponseEntity<List<AtividadeEntity>>(atividades, HttpStatus.NOT_FOUND);
+
+    }
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<AtividadeEntity> getAtividade(@PathVariable("id") String id) {
+  public ResponseEntity<Object> getAtividade(@PathVariable("id") String id) {
     AtividadeEntity atividade = null;
-
     try {
       atividade = service.getAtividadeById(id);
       System.out.print(atividade.toString());
 
-      return new ResponseEntity<AtividadeEntity>(atividade, HttpStatus.OK);
+      return new ResponseEntity<Object>(atividade, HttpStatus.OK);
     } catch (Exception error) {
-      return new ResponseEntity<AtividadeEntity>(atividade, HttpStatus.NOT_FOUND);
+      return new ResponseEntity<Object>(error, HttpStatus.NOT_FOUND);
+
     }
   }
 
@@ -59,16 +67,17 @@ public class AtividadeController {
       AtividadeEntity updatedAtividade = service.createAtividade(atividadeDTO);
       return new ResponseEntity<Object>(updatedAtividade, HttpStatus.CREATED);
 
-    }catch(Exception error){
+    } catch (Exception error) {
       System.out.println(error.getMessage());
       return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
+      
     }
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Object> updateAtividade(@RequestBody()  AtividadeDTO atividadeDTO,
-      @PathVariable("id") Long id) throws Exception {
-    
+  public ResponseEntity<Object> updateAtividade(@RequestBody() AtividadeDTO atividadeDTO, @PathVariable("id") Long id)
+      throws Exception {
+
     AtividadeEntity atividade = new AtividadeEntity();
     atividade.setDescricao(atividadeDTO.description);
     atividade.setTitulo(atividadeDTO.title);
@@ -79,12 +88,12 @@ public class AtividadeController {
     MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
 
     try {
-      
+
       AtividadeEntity updatedAtividade = service.updateAtividade(atividade, id, userPrincipal.getId());
       return new ResponseEntity<Object>(updatedAtividade, HttpStatus.CREATED);
-      
-    }catch(Exception error){
-      
+
+    } catch (Exception error) {
+
       return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
     }
   }
