@@ -4,7 +4,6 @@ import adiel.atividades.dtos.UserDTO;
 import adiel.atividades.entities.LoginResponse;
 import adiel.atividades.entities.User;
 import adiel.atividades.exceptions.UserAlreadyExistsException;
-import adiel.atividades.providers.TokenProvider;
 import adiel.atividades.services.JWTService;
 import adiel.atividades.services.MyUserDetailService;
 
@@ -16,8 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
-//FIXME: #### quando tudo já estiver ok, e o usuário já criado, remover o mapeamento new-user ####
 
 @Controller
 public class UserController {
@@ -33,12 +30,11 @@ public class UserController {
         User usuario = new User();
         usuario.setUsername(user.username);
         usuario.setPassword(user.password);
+        usuario.setTipo(user.type);
         try {
             usuarioService.save(usuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
         } catch (UserAlreadyExistsException e) {
-            // TODO Auto-generated catch block
-            // e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.message);
         }
     }
@@ -59,10 +55,8 @@ public class UserController {
             lResponse.message="Combinação usuário/senha incorreta!";
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(lResponse);
         }
-        // TokenProvider tokenProvider = new TokenProvider();
-        String token = //tokenProvider.generateToken(usuario);
-            jwtService.geraToken(myUser);
-        // String token = "TOken.a10je899q30r.1294u91r01w89.180414u801r4u1.12890170u12";
+
+        String token = jwtService.geraToken(myUser);
 
         lResponse.message="Sucesso! você está autenticado!";
         lResponse.user = usuario;

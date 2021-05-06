@@ -1,10 +1,8 @@
 package adiel.atividades.controllers;
 
-import java.security.Principal;
 import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import adiel.atividades.MyUserPrincipal;
+import adiel.atividades.dtos.AtividadeDTO;
 import adiel.atividades.entities.AtividadeEntity;
-import adiel.atividades.entities.User;
 import adiel.atividades.services.AtividadesService;
 import adiel.atividades.services.JWTService;
 
@@ -36,30 +34,17 @@ public class AtividadeController {
 
   @GetMapping
   public ResponseEntity<List<AtividadeEntity>> getAllAtividades() {
-    System.out.println("Getting all atividades");
-    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-        .getAuthentication();
-    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-
-    System.out.println("\t\t -> auth: " + auth.toString());
-
-    List<AtividadeEntity> atividades = service.getAllAtividades(userPrincipal.getId());
+    List<AtividadeEntity> atividades = service.getAllAtividades();
 
     return new ResponseEntity<List<AtividadeEntity>>(atividades, HttpStatus.OK);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<AtividadeEntity> getAtividade(@PathVariable("id") Long id) {
+  public ResponseEntity<AtividadeEntity> getAtividade(@PathVariable("id") String id) {
     AtividadeEntity atividade = null;
 
     try {
-      UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder
-          .getContext().getAuthentication();
-      MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-
-      System.out.println(userPrincipal.toString());
-
-      atividade = service.getAtividadeById(id, userPrincipal.getId());
+      atividade = service.getAtividadeById(id);
       System.out.print(atividade.toString());
 
       return new ResponseEntity<AtividadeEntity>(atividade, HttpStatus.OK);
@@ -69,30 +54,25 @@ public class AtividadeController {
   }
 
   @PostMapping
-  public ResponseEntity<Object> createAtividade(@RequestBody() AtividadeEntity atividade) throws Exception {
-    System.out.println("\n\nAtividadeE: " + atividade.toString() + "\n\n");
-
-    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-        .getAuthentication();
-    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-
-    System.out.println("\t\t -> auth: " + auth.toString());
-    atividade.setUserId(userPrincipal.getId());
+  public ResponseEntity<Object> createAtividade(@RequestBody() AtividadeDTO atividadeDTO) throws Exception {
     try {
-      AtividadeEntity updatedAtividade = service.createAtividade(atividade);
+      AtividadeEntity updatedAtividade = service.createAtividade(atividadeDTO);
       return new ResponseEntity<Object>(updatedAtividade, HttpStatus.CREATED);
 
     }catch(Exception error){
-      
-      return new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST);
+      System.out.println(error.getMessage());
+      return new ResponseEntity<Object>(error, HttpStatus.BAD_REQUEST);
     }
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Object> updateAtividade(@RequestBody() AtividadeEntity atividade,
+  public ResponseEntity<Object> updateAtividade(@RequestBody()  AtividadeDTO atividadeDTO,
       @PathVariable("id") Long id) throws Exception {
     
-    System.out.println("\n\nAtividadeE: " + atividade.toString() + "\n\n");
+    AtividadeEntity atividade = new AtividadeEntity();
+    atividade.setDescricao(atividadeDTO.description);
+    atividade.setTitulo(atividadeDTO.title);
+    atividade.setTipo(atividadeDTO.type);
 
     UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
         .getAuthentication();

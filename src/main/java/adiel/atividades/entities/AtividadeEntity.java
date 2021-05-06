@@ -17,11 +17,14 @@ public class AtividadeEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "titulo")
+  @Column(name = "titulo", nullable = false)
   private String titulo;
 
-  @Column(name = "descricao")
+  @Column(name = "descricao", nullable = false)
   private String descricao;
+
+  @Column(name = "tipo", nullable = false)
+  private String tipo;
 
   @Column(name = "created_at")
   private Date createdAt;
@@ -38,6 +41,10 @@ public class AtividadeEntity {
 
   public String getTitulo() {
     return this.titulo;
+  }
+
+  public String getTipo() {
+    return this.tipo;
   }
 
   public Long getUserId(){
@@ -62,6 +69,10 @@ public class AtividadeEntity {
 
   public void setTitulo(String titulo) {
     this.titulo = titulo;
+  }
+
+  public void setTipo(String tipo) {
+    this.tipo = tipo;
   }
 
   public void setDescricao(String descricao) {
