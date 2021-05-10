@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import adiel.atividades.MyUserPrincipal;
 import adiel.atividades.dtos.AtividadeDTO;
+import adiel.atividades.dtos.UpdateAtividadeDTO;
 import adiel.atividades.entities.AtividadeEntity;
 import adiel.atividades.services.AtividadesService;
 import adiel.atividades.services.JWTService;
@@ -73,39 +74,38 @@ public class AtividadeController {
       
     }
   }
-
-  @PutMapping("/{id}")
-  public ResponseEntity<Object> updateAtividade(@RequestBody() AtividadeDTO atividadeDTO, @PathVariable("id") Long id)
+ 
+  @PutMapping()// atualizar atividade na api externa
+  public ResponseEntity<Object> updateAtividadeExtenal(@RequestBody() UpdateAtividadeDTO dto)
       throws Exception {
-
-    AtividadeEntity atividade = new AtividadeEntity();
-    atividade.setDescricao(atividadeDTO.description);
-    atividade.setTitulo(atividadeDTO.title);
-    atividade.setTipo(atividadeDTO.type);
-
-    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-        .getAuthentication();
-    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-
     try {
-
-      AtividadeEntity updatedAtividade = service.updateAtividade(atividade, id, userPrincipal.getId());
-      return new ResponseEntity<Object>(updatedAtividade, HttpStatus.CREATED);
+      AtividadeEntity updatedAtividade = service.updateAtividade(dto);
+      return new ResponseEntity<Object>(updatedAtividade, HttpStatus.OK);
 
     } catch (Exception error) {
-
       return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+
+    }
+  }
+
+  @PutMapping("/{id}") // atualizar atividade na api interna
+  public ResponseEntity<Object> updateAtividade(@RequestBody() UpdateAtividadeDTO dto, @PathVariable("id") String id)
+      throws Exception {
+    try {
+      dto.id = id;
+      AtividadeEntity updatedAtividade = service.updateAtividade(dto);
+      return new ResponseEntity<Object>(updatedAtividade, HttpStatus.OK);
+
+    } catch (Exception error) {
+      return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+
     }
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deleteEmployeeById(@PathVariable("id") Long id) throws Exception {
-
-    UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-        .getAuthentication();
-    MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+  public ResponseEntity<Object> deleteEmployeeById(@PathVariable("id") String id) throws Exception {
     try {
-      service.deleteAtividadeById(id, userPrincipal.getId());
+      service.deleteAtividadeById(id);
       return new ResponseEntity<Object>(null, HttpStatus.OK);
     } catch (Exception error) {
       return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);

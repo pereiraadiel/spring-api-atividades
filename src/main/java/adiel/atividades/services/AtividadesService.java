@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import adiel.atividades.MyUserPrincipal;
 import adiel.atividades.dtos.AtividadeDTO;
+import adiel.atividades.dtos.UpdateAtividadeDTO;
 import adiel.atividades.entities.AtividadeEntity;
 import adiel.atividades.entities.TipoAtividade;
 import adiel.atividades.entities.User;
@@ -89,27 +90,55 @@ public class AtividadesService {
         }
     } 
 
-    public AtividadeEntity updateAtividade(AtividadeEntity entity, Long id, Long userId) throws Exception {
-        
-        AtividadeEntity atividade = repository.findByIdAndUserId(id, userId);
-        if(atividade == null) throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
-        
-        atividade.setDescricao(entity.getDescricao());
-        atividade.setTitulo(entity.getTitulo());
-        atividade.setCreatedAt(entity.getCreatedAt());
-        atividade.setUpdatedAt(new Date(System.currentTimeMillis()));
+    public AtividadeEntity updateAtividade(UpdateAtividadeDTO dto) throws Exception {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+          .getAuthentication();
+        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+      
+        TipoAtividade tipoAtividade = new TipoAtividade();
+        tipoAtividade.setTitulo(dto.type);
+        tService.createTipoAtividade(tipoAtividade);
 
-        atividade = repository.save(atividade);
+        User user = userPrincipal.getUser();
+        
+        if(user.getTipo().equals("interno")){
+            AtividadeEntity atividade = repository.findByIdAndUserId(Long.parseLong(dto.id), user.getId());
+            if(atividade == null) throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
             
-        return atividade;
+            atividade.setDescricao(dto.description);
+            atividade.setTitulo(dto.title);
+            atividade.setTipo(dto.type);
+            atividade.setUpdatedAt(new Date(System.currentTimeMillis()));
+            atividade.setUserId(user.getId());
+            atividade = repository.save(atividade);        
+            return atividade;
+        }
+        else{
+            UpdateAtividadeDTO uAtividadeDTO = new UpdateAtividadeDTO();
+            uAtividadeDTO.id = dto.id;
+            uAtividadeDTO.description = dto.description;
+            uAtividadeDTO.title = dto.title;
+            uAtividadeDTO.type = dto.type;
 
+            return externalApi.updateAtividade(uAtividadeDTO);
+        }
     } 
      
-    public void deleteAtividadeById(Long id, Long userId) throws Exception {
+    public Object deleteAtividadeById(String id) throws Exception {
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
+          .getAuthentication();
+        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+
+        User user = userPrincipal.getUser();
         
-        AtividadeEntity atividade = repository.findByIdAndUserId(id, userId);
-        if(atividade == null)  throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
-        repository.delete(atividade);
-         
+        if(user.getTipo().equals("interno")){
+            AtividadeEntity atividade = repository.findByIdAndUserId(Long.parseLong(id), user.getId());
+            if(atividade == null)  throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
+            repository.delete(atividade);
+        }
+        else{
+            externalApi.deleteAtividade(id);
+        }
+        return id;
     } 
 }
