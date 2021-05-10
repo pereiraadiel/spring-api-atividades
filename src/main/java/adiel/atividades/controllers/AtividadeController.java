@@ -55,7 +55,8 @@ public class AtividadeController {
 
       return new ResponseEntity<Object>(atividade, HttpStatus.OK);
     } catch (Exception error) {
-      return new ResponseEntity<Object>(error, HttpStatus.NOT_FOUND);
+      String notfound = "Not found!";
+      return new ResponseEntity<Object>(notfound, HttpStatus.NOT_FOUND);
 
     }
   }
@@ -83,7 +84,8 @@ public class AtividadeController {
 
     } catch (Exception error) {
       System.out.println(error.toString());
-      return new ResponseEntity<Object>(error, HttpStatus.NOT_FOUND);
+      String notfound = "Not found!";
+      return new ResponseEntity<Object>(notfound, HttpStatus.NOT_FOUND);
 
     }
   }
@@ -94,7 +96,8 @@ public class AtividadeController {
       service.deleteAtividadeById(id);
       return new ResponseEntity<Object>(null, HttpStatus.OK);
     } catch (Exception error) {
-      return new ResponseEntity<Object>(null, HttpStatus.NOT_FOUND);
+      String notfound = "Not found!";
+      return new ResponseEntity<Object>(notfound, HttpStatus.NOT_FOUND);
     }
   }
 
