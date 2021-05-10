@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import adiel.atividades.dtos.AtividadeDTO;
+import adiel.atividades.dtos.AtividadeResponseDTO;
 import adiel.atividades.dtos.UpdateAtividadeDTO;
 import adiel.atividades.dtos.UpdateAtividadeResponseDTO;
 import adiel.atividades.entities.AtividadeEntity;
@@ -35,7 +36,7 @@ public class ExternalAtividadeAPI {
   }
 
   /** ------- INDEX ------------ */
-  public List<AtividadeEntity> getAllAtividades() throws Exception{
+  public List<AtividadeResponseDTO> getAllAtividades(Long userId) throws Exception{
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -54,13 +55,14 @@ public class ExternalAtividadeAPI {
     if(responseExternal.getStatusCode() == HttpStatus.OK){
 
       ExternalAtividade[] externalAtividades = responseExternal.getBody();
-      List<AtividadeEntity> atividades = new ArrayList<>();
+      List<AtividadeResponseDTO> atividades = new ArrayList<>();
       for(ExternalAtividade externalAtividade: externalAtividades) {
-        AtividadeEntity atividade = new AtividadeEntity();
-        atividade.setTitulo(externalAtividade.getTitle());
-        atividade.setDescricao(externalAtividade.getDescription());
-        atividade.setTipo(externalAtividade.getType());
-        atividade.setId((long) 0);
+        AtividadeResponseDTO atividade = new AtividadeResponseDTO();
+        atividade.title = externalAtividade.getTitle();
+        atividade.description = externalAtividade.getDescription();
+        atividade.type = externalAtividade.getType();
+        atividade.id = externalAtividade.getId();
+        atividade.userId = userId.toString();
         atividades.add(atividade);
       }
 
@@ -83,7 +85,7 @@ public class ExternalAtividadeAPI {
         externalUrl+"/todo/{id}", 
         HttpMethod.GET,
         httpEntity,
-        ExternalAtividade.class,
+        ExternalAtividade.class, 
         id
       );
 
@@ -104,7 +106,7 @@ public class ExternalAtividadeAPI {
   }
 
   /** ------- CREATE ------------ */
-  public AtividadeEntity createAtividade(AtividadeDTO entity) throws Exception {
+  public AtividadeResponseDTO createAtividade(AtividadeDTO entity, Long userId) throws Exception {
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -116,12 +118,16 @@ public class ExternalAtividadeAPI {
       this.restTemplate.postForEntity(externalUrl+"/todo", httpEntity, ExternalAtividade.class);
     
     if(responseEntity == null) throw new Exception("Erro ao criar tipo de atividade");
-    AtividadeEntity aEntity = new AtividadeEntity();
+    
     ExternalAtividade eAtividade = responseEntity.getBody();
-    aEntity.setDescricao(eAtividade.getDescription());
-    aEntity.setTipo(eAtividade.getType());
-    aEntity.setTitulo(eAtividade.getTitle());
-    return aEntity;
+
+    AtividadeResponseDTO aDto = new AtividadeResponseDTO();
+    aDto.description = eAtividade.getDescription();
+    aDto.title = eAtividade.getTitle();
+    aDto.type = eAtividade.getType();
+    aDto.id = eAtividade.getId().toString();
+    aDto.userId = userId.toString();
+    return aDto;
   } 
 
   /** ------- UPDATE ------------ */

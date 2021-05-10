@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import adiel.atividades.providers.TokenProvider;
 import adiel.atividades.services.JWTService;
 import adiel.atividades.services.MyUserDetailService;
 import io.jsonwebtoken.Claims;
@@ -36,7 +35,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
           if(isValid){
               String loginUsuario =jwtService.obterLoginUsuario(token);
               UserDetails usuario = userService.loadUserByUsername(loginUsuario);
-            //   TokenProvider tProvider = new TokenProvider();
+            
               Claims claims = this.jwtService.obterClaims(token);
               UsernamePasswordAuthenticationToken user =
                       new UsernamePasswordAuthenticationToken(usuario, claims, usuario.getAuthorities());

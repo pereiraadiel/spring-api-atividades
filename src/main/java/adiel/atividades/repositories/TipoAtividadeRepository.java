@@ -10,4 +10,6 @@ import adiel.atividades.entities.TipoAtividade;
 @Repository
 public interface TipoAtividadeRepository extends JpaRepository<TipoAtividade, Long> {
   Optional<TipoAtividade> findById(Long id);
+
+  TipoAtividade findByTitulo(String titulo);
 }
