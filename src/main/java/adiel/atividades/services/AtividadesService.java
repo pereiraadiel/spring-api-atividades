@@ -16,6 +16,8 @@ import adiel.atividades.dtos.UpdateAtividadeDTO;
 import adiel.atividades.entities.AtividadeEntity;
 import adiel.atividades.entities.TipoAtividade;
 import adiel.atividades.entities.User;
+import adiel.atividades.exceptions.NotFoundException;
+import adiel.atividades.exceptions.UserAlreadyExistsException;
 import adiel.atividades.repositories.AtividadeRepository;
 import adiel.atividades.repositories.TipoAtividadeRepository;
 
@@ -37,13 +39,8 @@ public class AtividadesService {
 
     private final String NOT_FOUND_EXCEPTION_STRING = "Atividade não encontrada";
 
-    public List<AtividadeResponseDTO> getAllAtividades() throws Exception{
-        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-            .getAuthentication();
-        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+    public List<AtividadeResponseDTO> getAllAtividades(User user) throws NotFoundException{
         List<AtividadeEntity> atividades = new ArrayList<>();
-        
-        User user = userPrincipal.getUser();
         if(user.getTipo().equals("interno")){
             atividades = repository.findAllByUserId(user.getId());
         }else {
@@ -62,20 +59,15 @@ public class AtividadesService {
         return responseDTO;
     }
      
-    public AtividadeResponseDTO getAtividadeById(String id) throws Exception {
-        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-            .getAuthentication();
-        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
+    public AtividadeResponseDTO getAtividadeById(String id, User user) throws NotFoundException {
         AtividadeEntity atividade = null;
-        
-        User user = userPrincipal.getUser();
         if(user.getTipo().equals("interno")){
             atividade = repository.findByIdAndUserId(Long.parseLong(id), user.getId());
         }else {
             atividade = externalApi.getAtividade(id);
         }
 
-        if(atividade == null) throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
+        if(atividade == null) throw new NotFoundException(this.NOT_FOUND_EXCEPTION_STRING);
         AtividadeResponseDTO aDto = new AtividadeResponseDTO();
         aDto.description = atividade.getDescricao();
         aDto.title = atividade.getTitulo();
@@ -85,11 +77,7 @@ public class AtividadesService {
         return aDto;
     }
      
-    public AtividadeResponseDTO createAtividade(AtividadeDTO dto) throws Exception {
-        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-          .getAuthentication();
-        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-      
+    public AtividadeResponseDTO createAtividade(AtividadeDTO dto, User user) throws UserAlreadyExistsException, Exception {
         TipoAtividade tipoAtividade = tRepository.findByTitulo(dto.type);
         if(tipoAtividade == null) throw new Exception("Tipo de atividade não registrado!");
         
@@ -97,41 +85,42 @@ public class AtividadesService {
         atividade.setDescricao(dto.description);
         atividade.setTitulo(dto.title);
         atividade.setTipo(tipoAtividade.getId());
+
+        AtividadeResponseDTO aDto = null;
         
-        User user = userPrincipal.getUser();
         if(user.getTipo().equals("interno")){
             atividade.setUserId(user.getId());
-            atividade = repository.save(atividade);        
-            if(atividade == null) throw new Exception("Erro ao criar atividade");
+            atividade = repository.save(atividade);  
+            aDto = new AtividadeResponseDTO();      
+            if(atividade == null) throw new UserAlreadyExistsException("Erro ao criar atividade");
         }
         else{
-            return externalApi.createAtividade(dto, user.getId());
+            aDto = externalApi.createAtividade(dto, user.getId());
         }
 
-        AtividadeResponseDTO aDto = new AtividadeResponseDTO();
-        aDto.description = atividade.getDescricao();
-        aDto.title = atividade.getTitulo();
-        aDto.type = atividade.getTipo();
-        aDto.id = atividade.getId().toString();
-        aDto.userId = user.getId().toString();
+        if(aDto == null) {
+            throw new Exception("API indisponivel: Atividade nao pode ser criada!");
+        }
+        if(aDto.description == null) {
+            aDto.description = atividade.getDescricao();
+            aDto.title = atividade.getTitulo();
+            aDto.type = atividade.getTipo();
+            aDto.id = atividade.getId().toString();
+            aDto.userId = user.getId().toString();
+        }
         return aDto;
     } 
 
-    public AtividadeResponseDTO updateAtividade(UpdateAtividadeDTO dto) throws Exception {
-        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-          .getAuthentication();
-        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-      
+    public AtividadeResponseDTO updateAtividade(UpdateAtividadeDTO dto, User user) throws NotFoundException, UserAlreadyExistsException {
         TipoAtividade tipoAtividade = new TipoAtividade();
         tipoAtividade.setTitulo(dto.type);
         tService.createTipoAtividade(tipoAtividade);
 
-        User user = userPrincipal.getUser();
         AtividadeResponseDTO responseDTO = new AtividadeResponseDTO();
         AtividadeEntity atividade = new AtividadeEntity();
         if(user.getTipo().equals("interno")){
             atividade = repository.findByIdAndUserId(Long.parseLong(dto.id), user.getId());
-            if(atividade == null) throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
+            if(atividade == null) throw new NotFoundException(this.NOT_FOUND_EXCEPTION_STRING);
             
             atividade.setDescricao(dto.description);
             atividade.setTitulo(dto.title);
@@ -141,15 +130,9 @@ public class AtividadesService {
             atividade = repository.save(atividade);  
         }
         else{
-            UpdateAtividadeDTO uAtividadeDTO = new UpdateAtividadeDTO();
-            uAtividadeDTO.id = dto.id;
-            uAtividadeDTO.description = dto.description;
-            uAtividadeDTO.title = dto.title;
-            uAtividadeDTO.type = dto.type;
-
-            atividade = externalApi.updateAtividade(uAtividadeDTO);
+            atividade = externalApi.updateAtividade(dto);
         }
-
+        System.out.println(atividade.toString());
         responseDTO.description = atividade.getDescricao();
         responseDTO.id = dto.id;
         responseDTO.title = atividade.getTitulo();
@@ -158,16 +141,10 @@ public class AtividadesService {
         return responseDTO;
     } 
      
-    public Object deleteAtividadeById(String id) throws Exception {
-        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext()
-          .getAuthentication();
-        MyUserPrincipal userPrincipal = (MyUserPrincipal) auth.getPrincipal();
-
-        User user = userPrincipal.getUser();
-        
+    public Object deleteAtividadeById(String id, User user) throws NotFoundException {
         if(user.getTipo().equals("interno")){
             AtividadeEntity atividade = repository.findByIdAndUserId(Long.parseLong(id), user.getId());
-            if(atividade == null)  throw new Exception(this.NOT_FOUND_EXCEPTION_STRING);
+            if(atividade == null)  throw new NotFoundException(this.NOT_FOUND_EXCEPTION_STRING);
             repository.delete(atividade);
         }
         else{

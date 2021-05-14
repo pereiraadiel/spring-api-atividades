@@ -46,4 +46,8 @@ public class TipoAtividade {
     this.createdAt = new Date(System.currentTimeMillis());
     this.updatedAt = new Date(System.currentTimeMillis());
   }
+
+  public Object thenReturn(Class<TipoAtividade> class1) {
+    return null;
+  }
 }

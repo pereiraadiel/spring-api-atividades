@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 import adiel.atividades.entities.TipoAtividade;
+import adiel.atividades.exceptions.UserAlreadyExistsException;
 import adiel.atividades.repositories.TipoAtividadeRepository;
 
 @Service
@@ -23,14 +24,10 @@ public class TipoAtividadeService {
     return tAtividade;
   }
 
-  public TipoAtividade createTipoAtividade(TipoAtividade entity) throws Exception {
-    try {
-      entity = repository.save(entity);        
-    }
-    catch(Exception error){
-      throw new Exception("Algo deu errado ao criar o tipo de atividade");
-    }
-    if(entity == null) throw new Exception("Erro ao criar tipo de atividade");
+  public TipoAtividade createTipoAtividade(TipoAtividade entity) throws UserAlreadyExistsException {
+    entity = repository.save(entity);        
+    
+    if(entity == null) throw new UserAlreadyExistsException("Erro ao criar tipo de atividade");
     return entity;
   } 
 

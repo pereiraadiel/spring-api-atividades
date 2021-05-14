@@ -2,17 +2,15 @@ package adiel.atividades.exceptions;
 
 public class UserAlreadyExistsException extends Exception {
   public String message;
-  public String usuario;
 
   public UserAlreadyExistsException(String usuario){
-    this.usuario = usuario;
-    this.message = "Este usuário já esta em uso";
+    this.message = "Entidade já registrada: "+ usuario;
   }
 
   @Override
   public String toString() {
     // TODO Auto-generated method stub
-    return message + " " + usuario;
+    return message;
   }
 
 }

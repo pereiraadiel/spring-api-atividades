@@ -1,13 +1,13 @@
-// package adiel.simplerestAPI;
+package adiel.simplerestAPI;
 
-// import org.junit.jupiter.api.Test;
-// import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-// @SpringBootTest
-// class SimpleRestApiApplicationTests {
+@SpringBootTest
+class SimpleRestApiApplicationTests {
 
-// 	@Test
-// 	void contextLoads() {
-// 	}
+	@Test
+	void contextLoads() {
+	}
 
-// }
+}

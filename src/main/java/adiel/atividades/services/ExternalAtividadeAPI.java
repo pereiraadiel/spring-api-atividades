@@ -20,6 +20,8 @@ import adiel.atividades.dtos.UpdateAtividadeDTO;
 import adiel.atividades.dtos.UpdateAtividadeResponseDTO;
 import adiel.atividades.entities.AtividadeEntity;
 import adiel.atividades.entities.ExternalAtividade;
+import adiel.atividades.exceptions.NotFoundException;
+import adiel.atividades.exceptions.UserAlreadyExistsException;
 
 @Service
 public class ExternalAtividadeAPI {
@@ -36,7 +38,7 @@ public class ExternalAtividadeAPI {
   }
 
   /** ------- INDEX ------------ */
-  public List<AtividadeResponseDTO> getAllAtividades(Long userId) throws Exception{
+  public List<AtividadeResponseDTO> getAllAtividades(Long userId) throws NotFoundException{
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -68,11 +70,11 @@ public class ExternalAtividadeAPI {
 
       return atividades;
     }
-    throw new Exception("Atividade não encontrada");
+    throw new NotFoundException("Atividade não encontrada");
   }
 
   /** ------- SHOW ------------ */
-  public AtividadeEntity getAtividade(String id) throws Exception {
+  public AtividadeEntity getAtividade(String id) throws NotFoundException {
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -101,12 +103,12 @@ public class ExternalAtividadeAPI {
       atividade.setId((long) 0);
       return atividade;
     }
-    throw new Exception("Atividade não encontrada");
+    throw new NotFoundException("Atividade não encontrada");
     
   }
 
   /** ------- CREATE ------------ */
-  public AtividadeResponseDTO createAtividade(AtividadeDTO entity, Long userId) throws Exception {
+  public AtividadeResponseDTO createAtividade(AtividadeDTO entity, Long userId) throws UserAlreadyExistsException {
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -117,7 +119,7 @@ public class ExternalAtividadeAPI {
     ResponseEntity<ExternalAtividade> responseEntity = 
       this.restTemplate.postForEntity(externalUrl+"/todo", httpEntity, ExternalAtividade.class);
     
-    if(responseEntity == null) throw new Exception("Erro ao criar tipo de atividade");
+    if(responseEntity == null) throw new UserAlreadyExistsException("Erro ao criar tipo de atividade");
     
     ExternalAtividade eAtividade = responseEntity.getBody();
 
@@ -131,7 +133,7 @@ public class ExternalAtividadeAPI {
   } 
 
   /** ------- UPDATE ------------ */
-  public AtividadeEntity updateAtividade(UpdateAtividadeDTO dto) throws Exception{
+  public AtividadeEntity updateAtividade(UpdateAtividadeDTO dto) throws NotFoundException{
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -147,7 +149,7 @@ public class ExternalAtividadeAPI {
         UpdateAtividadeResponseDTO.class
       );
     
-    if(responseExternal.getStatusCode() != HttpStatus.OK) throw new Exception("Erro ao criar tipo de atividade");
+    if(responseExternal.getStatusCode() != HttpStatus.OK) throw new NotFoundException("Erro ao atualizar atividade");
     
     AtividadeEntity atividadeEntity = new AtividadeEntity();
     atividadeEntity.setTipo(dto.type);
@@ -158,7 +160,7 @@ public class ExternalAtividadeAPI {
 
   /** ------- DELETE ------------ 
    * @return */
-  public void deleteAtividade(String id) throws Exception {
+  public void deleteAtividade(String id) throws NotFoundException {
     MultiValueMap<String, String> headers = new HttpHeaders();
     headers.add("x-api-key", externalApiKey);
     System.out.println(headers.get("x-api-key").toString());
@@ -176,7 +178,7 @@ public class ExternalAtividadeAPI {
       );
 
     if(responseExternal.getStatusCode() != HttpStatus.OK)
-      throw new Exception("Atividade não encontrada");
+      throw new NotFoundException("Atividade não encontrada");
 
   }
 
